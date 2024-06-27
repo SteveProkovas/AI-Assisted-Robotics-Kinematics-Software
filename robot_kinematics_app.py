@@ -1,31 +1,20 @@
 import tkinter as tk
 from tkinter import filedialog, messagebox
-import trimesh
-from OCC.IGESControl import IGESControl_Reader
 import vtk
 
-def parse_stl(file_path):
-    mesh = trimesh.load_mesh(file_path)
-    return mesh
-
-def parse_iges(file_path):
-    reader = IGESControl_Reader()
-    reader.ReadFile(file_path)
-    reader.TransferRoots()
-    shape = reader.OneShape()
-    return shape
 
 class RobotKinematicsApp:
     def __init__(self, root):
         self.root = root
         self.root.title("Robot Kinematics App")
-        
+
         self.file_path = None
         self.robot_type = None
-        self.mesh = None
-        self.shape = None
-        
+        self.poly_data = None
+
         self.create_widgets()
+        self.center_window()
+        self.fullscreen()
 
     def create_widgets(self):
         self.upload_button = tk.Button(self.root, text="Upload CAD File", command=self.upload_file)
@@ -48,20 +37,33 @@ class RobotKinematicsApp:
         self.vtk_frame.pack(pady=10)
         self.vtk_widget = None
 
+    def center_window(self):
+        self.root.update_idletasks()
+        width = self.root.winfo_width()
+        height = self.root.winfo_height()
+        x = (self.root.winfo_screenwidth() // 2) - (width // 2)
+        y = (self.root.winfo_screenheight() // 2) - (height // 2)
+        self.root.geometry('{}x{}+{}+{}'.format(width, height, x, y))
+
+    def fullscreen(self):
+        self.root.attributes('-fullscreen', True)
+        self.root.bind('<Escape>', self.exit_fullscreen)
+
+    def exit_fullscreen(self, event=None):
+        self.root.attributes('-fullscreen', False)
+
     def upload_file(self):
         self.file_path = filedialog.askopenfilename(filetypes=[("CAD Files", "*.stl;*.igs;*.iges")])
         if self.file_path:
             file_extension = self.file_path.split('.')[-1].lower()
             try:
                 if file_extension == 'stl':
-                    self.mesh = parse_stl(self.file_path)
-                    self.shape = None
+                    self.poly_data = self.read_stl(self.file_path)
                     self.display_mesh_info()
                     self.display_mesh_vtk()
                     print("STL file loaded successfully")
                 elif file_extension in ['igs', 'iges']:
-                    self.shape = parse_iges(self.file_path)
-                    self.mesh = None
+                    self.poly_data = self.read_iges(self.file_path)
                     self.display_shape_info()
                     self.display_shape_vtk()
                     print("IGES file loaded successfully")
@@ -69,7 +71,7 @@ class RobotKinematicsApp:
                     raise ValueError("Unsupported file format")
             except Exception as e:
                 messagebox.showerror("Error", str(e))
-    
+
     def process_input(self):
         self.robot_type = self.robot_entry.get()
         if not self.file_path:
@@ -80,32 +82,48 @@ class RobotKinematicsApp:
             self.display_robot_info()
 
     def display_mesh_info(self):
-        if self.mesh:
-            info = f"Vertices: {len(self.mesh.vertices)}\nEdges: {len(self.mesh.edges)}\nFaces: {len(self.mesh.faces)}"
+        if self.poly_data:
+            points = self.poly_data.GetNumberOfPoints()
+            cells = self.poly_data.GetNumberOfCells()
+            info = f"Points: {points}\nCells: {cells}"
             self.update_info_text(info)
-    
+
     def display_shape_info(self):
-        if self.shape:
-            # Assuming `shape` has methods to extract the details similar to mesh
-            # This is a placeholder; actual implementation depends on the OCC methods available.
-            info = "Shape information (customize with actual attributes)"
-            self.update_info_text(info)
+        self.display_mesh_info()
 
     def display_robot_info(self):
         info = f"File: {self.file_path}\nRobot Type: {self.robot_type}"
-        if self.mesh:
-            info += f"\nMesh info: Vertices - {len(self.mesh.vertices)}, Faces - {len(self.mesh.faces)}"
-        if self.shape:
-            info += "\nShape info: [Details here]"
+        if self.poly_data:
+            points = self.poly_data.GetNumberOfPoints()
+            cells = self.poly_data.GetNumberOfCells()
+            info += f"\nPolyData info: Points - {points}, Cells - {cells}"
         self.update_info_text(info)
-    
+
     def update_info_text(self, info):
         self.info_text.config(state=tk.NORMAL)
         self.info_text.delete(1.0, tk.END)
         self.info_text.insert(tk.END, info)
         self.info_text.config(state=tk.DISABLED)
 
+    def read_stl(self, file_path):
+        reader = vtk.vtkSTLReader()
+        reader.SetFileName(file_path)
+        reader.Update()
+        return reader.GetOutput()
+
+    def read_iges(self, file_path):
+        reader = vtk.vtkIGESReader()
+        reader.SetFileName(file_path)
+        reader.Update()
+        return reader.GetOutput()
+
     def display_mesh_vtk(self):
+        self.display_vtk()
+
+    def display_shape_vtk(self):
+        self.display_vtk()
+
+    def display_vtk(self):
         if self.vtk_widget:
             self.vtk_widget.GetRenderWindow().Finalize()
             self.vtk_widget = None
@@ -114,26 +132,8 @@ class RobotKinematicsApp:
         renderer = vtk.vtkRenderer()
         self.vtk_widget.AddRenderer(renderer)
 
-        vertices = self.mesh.vertices
-        faces = self.mesh.faces
-
-        points = vtk.vtkPoints()
-        for vertex in vertices:
-            points.InsertNextPoint(vertex[0], vertex[1], vertex[2])
-
-        polys = vtk.vtkCellArray()
-        for face in faces:
-            polys.InsertNextCell(3)
-            polys.InsertCellPoint(face[0])
-            polys.InsertCellPoint(face[1])
-            polys.InsertCellPoint(face[2])
-
-        poly_data = vtk.vtkPolyData()
-        poly_data.SetPoints(points)
-        poly_data.SetPolys(polys)
-
         mapper = vtk.vtkPolyDataMapper()
-        mapper.SetInputData(poly_data)
+        mapper.SetInputData(self.poly_data)
 
         actor = vtk.vtkActor()
         actor.SetMapper(mapper)
@@ -144,9 +144,6 @@ class RobotKinematicsApp:
         self.vtk_widget.Render()
         self.vtk_widget.Start()
 
-    def display_shape_vtk(self):
-        # Placeholder: Actual implementation would be different based on how the shape data from pythonocc can be rendered in VTK
-        pass
 
 if __name__ == "__main__":
     root = tk.Tk()
