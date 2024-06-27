@@ -4,6 +4,11 @@
 
 This project aims to develop an AI-assisted software tool to aid robotics engineers in defining and simulating the kinematics of robotic designs, specifically focusing on 6-DOF robotic arms. The software will accept CAD files (IGES and STL formats), compute forward and inverse kinematics, and generate simulated motion visualizations.
 
+### Robotics kinematics involves the study of motion without considering forces. 
+1. It includes forward kinematics (calculating the position and orientation of the robot’s end-effector from given joint parameters) 
+2. Inverse kinematics (determining the joint parameters that provide a desired position of the end-effector).
+3. Integrating AI into this domain can enhance the capability to solve complex kinematic problems more efficiently and adaptively.
+
 ## Features
 
 1. **CAD File Support**: Accepts IGES and STL files for the robot design.
