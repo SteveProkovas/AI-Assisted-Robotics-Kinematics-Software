@@ -120,41 +120,6 @@ AI-Assisted-Robotics-Kinematics-Software/
 This module provides a simple and flexible implementation of forward kinematics for robotic arms using Denavit-Hartenberg (DH) parameters. It calculates the position and orientation of the robot's end-effector based on joint parameters. 
 Forward kinematics is the process of calculating the position and orientation of a robot's end-effector given the joint parameters. This module uses the DH parameter convention, which provides a systematic way to describe the geometry of robotic manipulators.
 
-### Mathematical Background
-
-#### Denavit-Hartenberg Parameters
-
-The DH parameters consist of four parameters for each joint/link of the robot:
-- \( \theta_i \) (theta): Joint angle
-- \( d_i \) (d): Link offset
-- \( a_i \) (a): Link length
-- \( \alpha_i \) (alpha): Link twist
-
-#### Transformation Matrix
-
-The transformation matrix from frame \( i \) to frame \( i-1 \) can be written as:
-
-\[ 
-T_i = \begin{bmatrix}
-\cos\theta_i & -\sin\theta_i \cos\alpha_i & \sin\theta_i \sin\alpha_i & a_i \cos\theta_i \\
-\sin\theta_i & \cos\theta_i \cos\alpha_i & -\cos\theta_i \sin\alpha_i & a_i \sin\theta_i \\
-0 & \sin\alpha_i & \cos\alpha_i & d_i \\
-0 & 0 & 0 & 1
-\end{bmatrix}
-\]
-
-This matrix describes the transformation from one coordinate frame to the next based on the DH parameters.
-
-#### Overall Transformation
-
-The overall transformation matrix from the base frame to the end-effector frame is obtained by multiplying the individual transformation matrices:
-
-\[ 
-T = T_1 T_2 T_3 \cdots T_n 
-\]
-
-where \( T_i \) are the transformation matrices for each joint/link.
-
 ### Installation
 
 Ensure you have Python installed. This module requires `numpy` for matrix operations.
