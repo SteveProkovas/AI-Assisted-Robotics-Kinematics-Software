@@ -35,8 +35,8 @@ This project aims to develop an AI-assisted software tool to aid robotics engine
 
 1. **Clone the repository**:
     ```bash
-    git clone https://github.com/yourusername/robotics-kinematics.git
-    cd robotics-kinematics
+    git clone https://github.com/SteveProkovas/AI-Assisted-Robotics-Kinematics-Software
+    cd AI-Assisted-Robotics-Kinematics-Software
     ```
 
 2. **Install Python dependencies**:
@@ -68,7 +68,7 @@ This project aims to develop an AI-assisted software tool to aid robotics engine
 ## Project Structure
 
 ```
-robotics-kinematics/
+AI-Assisted-Robotics-Kinematics-Software/
 ├── app.py                # Flask application entry point
 ├── static/
 │   └── styles.css        # CSS for web interface
@@ -113,16 +113,16 @@ robotics-kinematics/
         return shape
     ```
 
-# Kinematic Analysis
+### Kinematic Analysis
 
-## Forward Kinematics using Denavit-Hartenberg Parameters
+#### Forward Kinematics using Denavit-Hartenberg Parameters
 
 This module provides a simple and flexible implementation of forward kinematics for robotic arms using Denavit-Hartenberg (DH) parameters. It calculates the position and orientation of the robot's end-effector based on joint parameters. 
 Forward kinematics is the process of calculating the position and orientation of a robot's end-effector given the joint parameters. This module uses the DH parameter convention, which provides a systematic way to describe the geometry of robotic manipulators.
 
-## Mathematical Background
+### Mathematical Background
 
-### Denavit-Hartenberg Parameters
+#### Denavit-Hartenberg Parameters
 
 The DH parameters consist of four parameters for each joint/link of the robot:
 - \( \theta_i \) (theta): Joint angle
@@ -130,7 +130,7 @@ The DH parameters consist of four parameters for each joint/link of the robot:
 - \( a_i \) (a): Link length
 - \( \alpha_i \) (alpha): Link twist
 
-### Transformation Matrix
+#### Transformation Matrix
 
 The transformation matrix from frame \( i \) to frame \( i-1 \) can be written as:
 
@@ -145,7 +145,7 @@ T_i = \begin{bmatrix}
 
 This matrix describes the transformation from one coordinate frame to the next based on the DH parameters.
 
-### Overall Transformation
+#### Overall Transformation
 
 The overall transformation matrix from the base frame to the end-effector frame is obtained by multiplying the individual transformation matrices:
 
@@ -155,7 +155,7 @@ T = T_1 T_2 T_3 \cdots T_n
 
 where \( T_i \) are the transformation matrices for each joint/link.
 
-## Installation
+### Installation
 
 Ensure you have Python installed. This module requires `numpy` for matrix operations.
 
@@ -165,9 +165,9 @@ You can install `numpy` using pip:
 pip install numpy
 ```
 
-## Usage
+### Usage
 
-### DHParameter Class
+#### DHParameter Class
 
 Represents a single DH parameter set for a robot joint/link.
 
@@ -180,7 +180,7 @@ class DHParameter:
         self.alpha = alpha
 ```
 
-### dh_transformation_matrix Function
+#### dh_transformation_matrix Function
 
 Computes the transformation matrix for given DH parameters.
 
@@ -194,7 +194,7 @@ def dh_transformation_matrix(theta, d, a, alpha):
     ])
 ```
 
-### forward_kinematics Function
+#### forward_kinematics Function
 
 Takes a list of `DHParameter` objects and computes the overall transformation matrix from the base frame to the end-effector frame.
 
@@ -207,7 +207,7 @@ def forward_kinematics(dh_parameters):
     return T
 ```
 
-## Example
+### Example
 
 Define DH parameters for a simple 2-DOF robot arm and calculate the transformation matrix.
 
@@ -227,95 +227,24 @@ print("Transformation matrix from base to end-effector:")
 print(T)
 ```
 
-### Expected Output
+#### Expected Output
 
 The transformation matrix from the base to the end-effector will be printed. This matrix describes the position and orientation of the end-effector in the base frame.
 
-2. **Inverse Kinematics**:
-    ```python
-    from scipy.optimize import minimize
+### Inverse Kinematics
+```python
+from scipy.optimize import minimize
 
-    def inverse_kinematics(target_pose, dh_params, initial_guess):
-        def objective_function(joint_angles):
-            current_pose = forward_kinematics(dh_params, joint_angles)
-            position_error = np.linalg.norm(target_pose[:3, 3] - current_pose[:3, 3])
-            orientation_error = np.linalg.norm(target_pose[:3, :3] - current_pose[:3, :3])
-            return position_error + orientation_error
-        
-        result = minimize(objective_function, initial_guess, method='BFGS')
-        return result.x
-    ```
-
-### MATLAB/Simulink Integration
-
-1. **MATLAB Script for Robot Simulation**:
-    ```matlab
-    % MATLAB script for creating a robotic arm and running a simulation
-    dhparams = [0 0.1 0 pi/2;
-                0.2 0 0 0;
-                0.1 0 0 pi/2;
-                0 -0.2 0 -pi/2;
-                0 0 0 pi/2;
-                0.1 0 0 0];
-    robot = robotics.RigidBodyTree;
-    for i = 1:size(dhparams, 1)
-        link = robotics.RigidBody(['link', num2str(i)]);
-        joint = robotics.Joint(['joint', num2str(i)], 'revolute');
-        setFixedTransform(joint, dhparams(i, :), 'dh');
-        link.Joint = joint;
-        if i == 1
-            addBody(robot, link, 'base');
-        else
-            addBody(robot, link, ['link', num2str(i-1)]);
-        end
-    end
-    show(robot);
-    ```
-
-2. **Simulate and Visualize**:
-    ```matlab
-    % Simulate and visualize robot motion
-    q0 = homeConfiguration(robot);
-    t = (0:0.2:10)';
-    q = repmat(q0, 1, numel(t));
-    for i = 1:numel(t)
-        q(i).JointPosition = t(i) * ones(6, 1);
-    end
-    show(robot, q);
-    ```
-
-## User Interface Development
-
-1. **Front-End**:
-    ```html
-    <!-- HTML Example for File Upload and Visualization -->
-    <input type="file" id="fileInput" />
-    <button onclick="uploadFile()">Upload</button>
-    <div id="visualization"></div>
-
-    <script>
-    function uploadFile() {
-        const input = document.getElementById('fileInput');
-        const file = input.files[0];
-        // Handle file upload and processing
-    }
-    </script>
-    ```
-
-2. **Back-End**:
-    ```python
-    from flask import Flask, request, jsonify
-    app = Flask(__name__)
-
-    @app.route('/upload', methods=['POST'])
-    def upload_file():
-        file = request.files['file']
-        # Process file and perform kinematic calculations
-        return jsonify(result="Success")
-
-    if __name__ == '__main__':
-        app.run(debug=True)
-    ```
+def inverse_kinematics(target_pose, dh_params, initial_guess):
+    def objective_function(joint_angles):
+        current_pose = forward_kinematics(dh_params, joint_angles)
+        position_error = np.linalg.norm(target_pose[:3, 3] - current_pose[:3, 3])
+        orientation_error = np.linalg.norm(target_pose[:3, :3] - current_pose[:3, :3])
+        return position_error + orientation_error
+    
+    result = minimize(objective_function, initial_guess, method='BFGS')
+    return result.x
+```
 
 ## Testing and Refinement
 
@@ -337,4 +266,4 @@ This project is licensed under the Apache 2.0 License. See the `LICENSE` file fo
 
 ## Contact
 
-For any questions or support, please contact `steve.prokovas@eyengineers.eu`
+For any questions or support, please contact `steve.prokovas@eyengineers.eu` 
