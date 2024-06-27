@@ -1,5 +1,3 @@
-# robot_kinematics_app.py
-
 import tkinter as tk
 from tkinter import filedialog
 import trimesh
