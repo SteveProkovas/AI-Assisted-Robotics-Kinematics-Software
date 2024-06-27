@@ -108,26 +108,123 @@ robotics-kinematics/
         return shape
     ```
 
-### Kinematic Analysis
+# Kinematic Analysis
 
-1. **Forward Kinematics**:
-    ```python
-    import numpy as np
+## Forward Kinematics using Denavit-Hartenberg Parameters
 
-    def dh_transform(a, alpha, d, theta):
-        return np.array([
-            [np.cos(theta), -np.sin(theta) * np.cos(alpha), np.sin(theta) * np.sin(alpha), a * np.cos(theta)],
-            [np.sin(theta), np.cos(theta) * np.cos(alpha), -np.cos(theta) * np.sin(alpha), a * np.sin(theta)],
-            [0, np.sin(alpha), np.cos(alpha), d],
-            [0, 0, 0, 1]
-        ])
+This module provides a simple and flexible implementation of forward kinematics for robotic arms using Denavit-Hartenberg (DH) parameters. It calculates the position and orientation of the robot's end-effector based on joint parameters. 
+Forward kinematics is the process of calculating the position and orientation of a robot's end-effector given the joint parameters. This module uses the DH parameter convention, which provides a systematic way to describe the geometry of robotic manipulators.
 
-    def forward_kinematics(dh_params, joint_angles):
-        T = np.eye(4)
-        for i in range(len(joint_angles)):
-            T = np.dot(T, dh_transform(dh_params[i][0], dh_params[i][1], dh_params[i][2], joint_angles[i]))
-        return T
-    ```
+## Mathematical Background
+
+### Denavit-Hartenberg Parameters
+
+The DH parameters consist of four parameters for each joint/link of the robot:
+- \( \theta_i \) (theta): Joint angle
+- \( d_i \) (d): Link offset
+- \( a_i \) (a): Link length
+- \( \alpha_i \) (alpha): Link twist
+
+### Transformation Matrix
+
+The transformation matrix from frame \( i \) to frame \( i-1 \) can be written as:
+
+\[ 
+T_i = \begin{bmatrix}
+\cos\theta_i & -\sin\theta_i \cos\alpha_i & \sin\theta_i \sin\alpha_i & a_i \cos\theta_i \\
+\sin\theta_i & \cos\theta_i \cos\alpha_i & -\cos\theta_i \sin\alpha_i & a_i \sin\theta_i \\
+0 & \sin\alpha_i & \cos\alpha_i & d_i \\
+0 & 0 & 0 & 1
+\end{bmatrix}
+\]
+
+This matrix describes the transformation from one coordinate frame to the next based on the DH parameters.
+
+### Overall Transformation
+
+The overall transformation matrix from the base frame to the end-effector frame is obtained by multiplying the individual transformation matrices:
+
+\[ 
+T = T_1 T_2 T_3 \cdots T_n 
+\]
+
+where \( T_i \) are the transformation matrices for each joint/link.
+
+## Installation
+
+Ensure you have Python installed. This module requires `numpy` for matrix operations.
+
+You can install `numpy` using pip:
+
+```bash
+pip install numpy
+```
+
+## Usage
+
+### DHParameter Class
+
+Represents a single DH parameter set for a robot joint/link.
+
+```python
+class DHParameter:
+    def __init__(self, theta, d, a, alpha):
+        self.theta = theta
+        self.d = d
+        self.a = a
+        self.alpha = alpha
+```
+
+### dh_transformation_matrix Function
+
+Computes the transformation matrix for given DH parameters.
+
+```python
+def dh_transformation_matrix(theta, d, a, alpha):
+    return np.array([
+        [np.cos(theta), -np.sin(theta)*np.cos(alpha), np.sin(theta)*np.sin(alpha), a*np.cos(theta)],
+        [np.sin(theta), np.cos(theta)*np.cos(alpha), -np.cos(theta)*np.sin(alpha), a*np.sin(theta)],
+        [0, np.sin(alpha), np.cos(alpha), d],
+        [0, 0, 0, 1]
+    ])
+```
+
+### forward_kinematics Function
+
+Takes a list of `DHParameter` objects and computes the overall transformation matrix from the base frame to the end-effector frame.
+
+```python
+def forward_kinematics(dh_parameters):
+    T = np.eye(4)
+    for param in dh_parameters:
+        T_i = dh_transformation_matrix(param.theta, param.d, param.a, param.alpha)
+        T = np.dot(T, T_i)
+    return T
+```
+
+## Example
+
+Define DH parameters for a simple 2-DOF robot arm and calculate the transformation matrix.
+
+```python
+import numpy as np
+from kinematics import DHParameter, forward_kinematics
+
+# Define DH parameters for a simple 2-DOF robot arm
+dh_params = [
+    DHParameter(np.radians(45), 1, 1, np.radians(90)),
+    DHParameter(np.radians(30), 0, 1, 0)
+]
+
+# Calculate forward kinematics
+T = forward_kinematics(dh_params)
+print("Transformation matrix from base to end-effector:")
+print(T)
+```
+
+### Expected Output
+
+The transformation matrix from the base to the end-effector will be printed. This matrix describes the position and orientation of the end-effector in the base frame.
 
 2. **Inverse Kinematics**:
     ```python
