@@ -235,8 +235,4 @@ This project is licensed under the Apache 2.0 License. See the `LICENSE` file fo
 
 ## Contact
 
-For any questions or support, please contact `steve.prokovas@eyengineers.eu`.
-
----
-
-By following these steps, you can create comprehensive AI software that assists robotics engineers in defining and simulating the kinematics of their robot designs.
+For any questions or support, please contact `steve.prokovas@eyengineers.eu`
