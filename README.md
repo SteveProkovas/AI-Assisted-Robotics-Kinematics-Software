@@ -87,6 +87,7 @@ AI-Assisted-Robotics-Kinematics-Software/
 │   └── train_model.py    # AI model training script
 └── README.md             # This README file
 ```
+![Fountain Model](https://github.com/SteveProkovas/AI-Assisted-Robotics-Kinematics-Software/assets/111713110/c235ba51-0ad1-4ad8-a59d-16a40126c5e7)
 
 ## Detailed Instructions
 
