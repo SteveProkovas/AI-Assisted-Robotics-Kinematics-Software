@@ -88,8 +88,10 @@ AI-Assisted-Robotics-Kinematics-Software/
 └── README.md             # This README file
 ```
 
-![Fountain Model drawio](https://github.com/SteveProkovas/AI-Assisted-Robotics-Kinematics-Software/assets/111713110/1bc2d55d-934f-49af-ad93-903b1ba07aa3)
+## Development Methodology
+This project is developed using the Fountain Model. The Fountain Model is a combination of iterative and waterfall methodologies, which allows for continuous refinement and feedback incorporation while maintaining a structured approach to development. It is particularly suited for projects that require extensive testing and refinement, such as robotics software.
 
+[Fountain Model.pdf](https://github.com/user-attachments/files/16033995/Fountain.Model.pdf)
 
 
 ## Detailed Instructions
